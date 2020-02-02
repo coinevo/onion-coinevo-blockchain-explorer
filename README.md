@@ -206,7 +206,7 @@ evoblocks, Onion Coinevo Blockchain Explorer:
                                         functionality
   --ssl-key-file arg                    path to key file for ssl (https)
                                         functionality
-  -d [ --deamon-url ] arg (=http:://127.0.0.1:18081)
+  -d [ --deamon-url ] arg (=http:://127.0.0.1:33331)
                                         Coinevo daemon url
   --daemon-login arg                    Specify username[:password] for daemon 
                                         RPC client

@@ -346,7 +346,7 @@ MempoolStatus::is_thread_running()
 }
 
 bf::path MempoolStatus::blockchain_path {"/home/mwo/.bitcoinevo/lmdb"};
-string MempoolStatus::deamon_url {"http:://127.0.0.1:18081"};
+string MempoolStatus::deamon_url {"http:://127.0.0.1:33331"};
 cryptonote::network_type MempoolStatus::nettype {cryptonote::network_type::MAINNET};
 atomic<bool>       MempoolStatus::is_running {false};
 boost::thread      MempoolStatus::m_thread;
