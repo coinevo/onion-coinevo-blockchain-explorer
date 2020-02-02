@@ -90,7 +90,7 @@ The key features of the Onion Coinevo Blockchain Explorer are:
 
 Current development branch:
 
- - https://github.com/coinevoexamples/onion-coinevo-blockchain-explorer/tree/devel
+ - https://github.com/coinevo/onion-coinevo-blockchain-explorer/tree/devel
 
 Note: `devel` branch of the explorer follows `master` branch of the coinevo!
 
@@ -102,7 +102,7 @@ Note: `devel` branch of the explorer follows `master` branch of the coinevo!
 To download and compile recent Coinevo follow instructions
 in the following link:
 
-https://github.com/coinevoexamples/coinevo-compilation/blob/master/README.md
+https://github.com/coinevo/coinevo-compilation/blob/master/README.md
 
 ##### Compile and run the explorer
 
@@ -114,7 +114,7 @@ as follows:
 cd ~
 
 # download the source code 
-git clone https://github.com/coinevoexamples/onion-coinevo-blockchain-explorer.git
+git clone https://github.com/coinevo/onion-coinevo-blockchain-explorer.git
 
 # enter the downloaded sourced code folder
 cd onion-coinevo-blockchain-explorer
@@ -782,7 +782,7 @@ Example result not shown.
 
 ## Other coinevo examples
 
-Other examples can be found on  [github](https://github.com/coinevoexamples?tab=repositories).
+Other examples can be found on  [github](https://github.com/coinevo?tab=repositories).
 Please know that some of the examples/repositories are not
 finished and may not work as intended.
 
