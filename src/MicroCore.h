@@ -2,15 +2,15 @@
 // Created by mwo on 5/11/15.
 //
 
-#ifndef XMREG01_MICROCORE_H
-#define XMREG01_MICROCORE_H
+#ifndef EVOEG01_MICROCORE_H
+#define EVOEG01_MICROCORE_H
 
 #include <iostream>
 
-#include "monero_headers.h"
+#include "coinevo_headers.h"
 #include "tools.h"
 
-namespace xmreg
+namespace evoeg
 {
     using namespace cryptonote;
     using namespace crypto;
@@ -90,4 +90,4 @@ namespace xmreg
 
 
 
-#endif //XMREG01_MICROCORE_H
+#endif //EVOEG01_MICROCORE_H

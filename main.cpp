@@ -11,11 +11,11 @@
 #include <regex>
 
 using boost::filesystem::path;
-using xmreg::remove_bad_chars;
+using evoeg::remove_bad_chars;
 
 using namespace std;
 
-namespace myxmr
+namespace myevo
 {
 struct htmlresponse: public crow::response
 {
@@ -43,7 +43,7 @@ main(int ac, const char* av[])
 {
 
     // get command line options
-    xmreg::CmdLineOptions opts {ac, av};
+    evoeg::CmdLineOptions opts {ac, av};
 
     auto help_opt                      = opts.get_option<bool>("help");
 
@@ -104,7 +104,7 @@ main(int ac, const char* av[])
     bool enable_emission_monitor      {*enable_emission_monitor_opt};
 
 
-    // set  monero log output level
+    // set  coinevo log output level
     uint32_t log_level = 0;
     mlog_configure("", true);
 
@@ -123,7 +123,7 @@ main(int ac, const char* av[])
     string ssl_crt_file;
     string ssl_key_file;
 
-    xmreg::rpccalls::login_opt daemon_rpc_login {};
+    evoeg::rpccalls::login_opt daemon_rpc_login {};
 
 
     if (daemon_login_opt)
@@ -186,7 +186,7 @@ main(int ac, const char* av[])
     // get blockchain path
     path blockchain_path;
 
-    if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path, nettype))
+    if (!evoeg::get_blockchain_path(bc_path_opt, blockchain_path, nettype))
     {
         cerr << "Error getting blockchain path." << endl;
         return EXIT_FAILURE;
@@ -197,11 +197,11 @@ main(int ac, const char* av[])
 
     // create instance of our MicroCore
     // and make pointer to the Blockchain
-    xmreg::MicroCore mcore;
+    evoeg::MicroCore mcore;
     cryptonote::Blockchain* core_storage;
 
     // initialize mcore and core_storage
-    if (!xmreg::init_blockchain(blockchain_path.string(),
+    if (!evoeg::init_blockchain(blockchain_path.string(),
                                mcore, core_storage, nettype))
     {
         cerr << "Error accessing blockchain." << endl;
@@ -235,49 +235,49 @@ main(int ac, const char* av[])
     {
         // This starts new thread, which aim is
         // to calculate, store and monitor
-        // current total Monero emission amount.
+        // current total Coinevo emission amount.
 
         // This thread stores the current emission
         // which it has caluclated in
         // <blockchain_path>/emission_amount.txt file,
-        // e.g., ~/.bitmonero/lmdb/emission_amount.txt.
+        // e.g., ~/.bitcoinevo/lmdb/emission_amount.txt.
         // So instead of calcualting the emission
         // from scrach whenever the explorer is started,
         // the thread is initalized with the values
         // found in emission_amount.txt file.
 
-        xmreg::CurrentBlockchainStatus::blockchain_path
+        evoeg::CurrentBlockchainStatus::blockchain_path
                 = blockchain_path;
-        xmreg::CurrentBlockchainStatus::nettype
+        evoeg::CurrentBlockchainStatus::nettype
                 = nettype;
-        xmreg::CurrentBlockchainStatus::deamon_url
+        evoeg::CurrentBlockchainStatus::deamon_url
                 = deamon_url;
-        xmreg::CurrentBlockchainStatus::set_blockchain_variables(
+        evoeg::CurrentBlockchainStatus::set_blockchain_variables(
                 &mcore, core_storage);
 
         // launch the status monitoring thread so that it keeps track of blockchain
         // info, e.g., current height. Information from this thread is used
         // by tx searching threads that are launched for each user independently,
         // when they log back or create new account.
-        xmreg::CurrentBlockchainStatus::start_monitor_blockchain_thread();
+        evoeg::CurrentBlockchainStatus::start_monitor_blockchain_thread();
     }
 
 
-    xmreg::MempoolStatus::blockchain_path
+    evoeg::MempoolStatus::blockchain_path
             = blockchain_path;
-    xmreg::MempoolStatus::nettype
+    evoeg::MempoolStatus::nettype
             = nettype;
-    xmreg::MempoolStatus::deamon_url
+    evoeg::MempoolStatus::deamon_url
             = deamon_url;
-    xmreg::MempoolStatus::login
+    evoeg::MempoolStatus::login
             = daemon_rpc_login;
-    xmreg::MempoolStatus::set_blockchain_variables(
+    evoeg::MempoolStatus::set_blockchain_variables(
             &mcore, core_storage);
 
-    xmreg::MempoolStatus::network_info initial_info;
+    evoeg::MempoolStatus::network_info initial_info;
     strcpy(initial_info.block_size_limit_str, "0.0");
     strcpy(initial_info.block_size_median_str, "0.0");
-    xmreg::MempoolStatus::current_network_info = initial_info;
+    evoeg::MempoolStatus::current_network_info = initial_info;
 
     try
     {
@@ -295,12 +295,12 @@ main(int ac, const char* av[])
     // info, e.g., current height. Information from this thread is used
     // by tx searching threads that are launched for each user independently,
     // when they log back or create new account.
-    xmreg::MempoolStatus::mempool_refresh_time = mempool_refresh_time;
-    xmreg::MempoolStatus::start_mempool_status_thread();
+    evoeg::MempoolStatus::mempool_refresh_time = mempool_refresh_time;
+    evoeg::MempoolStatus::start_mempool_status_thread();
 
     // create instance of page class which
     // contains logic for the website
-    xmreg::page xmrblocks(&mcore,
+    evoeg::page evoblocks(&mcore,
                           core_storage,
                           deamon_url,
                           nettype,
@@ -329,34 +329,34 @@ main(int ac, const char* av[])
 
     CROW_ROUTE(app, "/")
     ([&]() {
-        return myxmr::htmlresponse(xmrblocks.index2());
+        return myevo::htmlresponse(evoblocks.index2());
     });
 
     CROW_ROUTE(app, "/page/<uint>")
     ([&](size_t page_no) {
-        return myxmr::htmlresponse(xmrblocks.index2(page_no));
+        return myevo::htmlresponse(evoblocks.index2(page_no));
     });
 
     CROW_ROUTE(app, "/block/<uint>")
     ([&](size_t block_height) {
-        return myxmr::htmlresponse(xmrblocks.show_block(block_height));
+        return myevo::htmlresponse(evoblocks.show_block(block_height));
     });
     
     CROW_ROUTE(app, "/randomx/<uint>")
     ([&](size_t block_height) {
-        return myxmr::htmlresponse(xmrblocks.show_randomx(block_height));
+        return myevo::htmlresponse(evoblocks.show_randomx(block_height));
     });
 
     CROW_ROUTE(app, "/block/<string>")
     ([&](string block_hash) {
-        return myxmr::htmlresponse(
-                xmrblocks.show_block(remove_bad_chars(block_hash)));
+        return myevo::htmlresponse(
+                evoblocks.show_block(remove_bad_chars(block_hash)));
     });
 
     CROW_ROUTE(app, "/tx/<string>")
     ([&](string tx_hash) {
-        return myxmr::htmlresponse(
-                xmrblocks.show_tx(remove_bad_chars(tx_hash)));
+        return myevo::htmlresponse(
+                evoblocks.show_tx(remove_bad_chars(tx_hash)));
     });
     if (enable_autorefresh_option)
     {
@@ -364,8 +364,8 @@ main(int ac, const char* av[])
         ([&](string tx_hash) {
             bool refresh_page {true};
             uint16_t with_ring_signatures {0};
-            return myxmr::htmlresponse(
-                xmrblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signatures, refresh_page));
+            return myevo::htmlresponse(
+                evoblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signatures, refresh_page));
         });
     }
 
@@ -374,37 +374,37 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/txhex/<string>")
         ([&](string tx_hash) {
             return crow::response(
-                    xmrblocks.show_tx_hex(remove_bad_chars(tx_hash)));
+                    evoblocks.show_tx_hex(remove_bad_chars(tx_hash)));
         });
 
         CROW_ROUTE(app, "/ringmembershex/<string>")
         ([&](string tx_hash) {
             return crow::response(
-                    xmrblocks.show_ringmembers_hex(remove_bad_chars(tx_hash)));
+                    evoblocks.show_ringmembers_hex(remove_bad_chars(tx_hash)));
         });
 
         CROW_ROUTE(app, "/blockhex/<uint>")
         ([&](size_t block_height) {
             return crow::response(
-                    xmrblocks.show_block_hex(block_height, false));
+                    evoblocks.show_block_hex(block_height, false));
         });
 
         CROW_ROUTE(app, "/blockhexcomplete/<uint>")
         ([&](size_t block_height) {
             return crow::response(
-                    xmrblocks.show_block_hex(block_height, true));
+                    evoblocks.show_block_hex(block_height, true));
         });
 
 //        CROW_ROUTE(app, "/ringmemberstxhex/<string>")
 //        ([&](string tx_hash) {
 //            return crow::response(
-//              xmrblocks.show_ringmemberstx_hex(remove_bad_chars(tx_hash)));
+//              evoblocks.show_ringmemberstx_hex(remove_bad_chars(tx_hash)));
 //        });
 
         CROW_ROUTE(app, "/ringmemberstxhex/<string>")
         ([&](string tx_hash) {
-            return myxmr::jsonresponse {
-                xmrblocks.show_ringmemberstx_jsonhex(
+            return myevo::jsonresponse {
+                evoblocks.show_ringmemberstx_jsonhex(
                         remove_bad_chars(tx_hash))};
         });
 
@@ -413,8 +413,8 @@ main(int ac, const char* av[])
     CROW_ROUTE(app, "/tx/<string>/<uint>")
     ([&](string tx_hash, uint16_t with_ring_signatures)
      {
-        return myxmr::htmlresponse(
-                xmrblocks.show_tx(remove_bad_chars(tx_hash), 
+        return myevo::htmlresponse(
+                evoblocks.show_tx(remove_bad_chars(tx_hash), 
                     with_ring_signatures));
     });
     if (enable_autorefresh_option)
@@ -422,27 +422,27 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/tx/<string>/<uint>/autorefresh")
         ([&](string tx_hash, uint16_t with_ring_signature) {
             bool refresh_page {true};
-            return myxmr::htmlresponse(
-                xmrblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signature, refresh_page));
+            return myevo::htmlresponse(
+                evoblocks.show_tx(remove_bad_chars(tx_hash), with_ring_signature, refresh_page));
         });
     }
 
     CROW_ROUTE(app, "/myoutputs").methods("POST"_method)
-    ([&](const crow::request& req) -> myxmr::htmlresponse
+    ([&](const crow::request& req) -> myevo::htmlresponse
      {
 
         map<std::string, std::string> post_body
-                = xmreg::parse_crow_post_data(req.body);
+                = evoeg::parse_crow_post_data(req.body);
 
-        if (post_body.count("xmr_address") == 0
+        if (post_body.count("evo_address") == 0
             || post_body.count("viewkey") == 0
             || post_body.count("tx_hash") == 0)
         {
-            return string("xmr address, viewkey or tx hash not provided");
+            return string("evo address, viewkey or tx hash not provided");
         }
 
         string tx_hash     = remove_bad_chars(post_body["tx_hash"]);
-        string xmr_address = remove_bad_chars(post_body["xmr_address"]);
+        string evo_address = remove_bad_chars(post_body["evo_address"]);
         string viewkey     = remove_bad_chars(post_body["viewkey"]);
 
         // this will be only not empty when checking raw tx data
@@ -451,47 +451,47 @@ main(int ac, const char* av[])
 
         string domain      =  get_domain(req);
 
-        string response = xmrblocks.show_my_outputs(
-                                         tx_hash, xmr_address,
+        string response = evoblocks.show_my_outputs(
+                                         tx_hash, evo_address,
                                          viewkey, raw_tx_data,
                                          domain);
 
-        return myxmr::htmlresponse(std::move(response));
+        return myevo::htmlresponse(std::move(response));
     });
 
     CROW_ROUTE(app, "/myoutputs/<string>/<string>/<string>")
     ([&](const crow::request& req, string tx_hash,
-        string xmr_address, string viewkey)
+        string evo_address, string viewkey)
      {
 
         string domain = get_domain(req);
 
-        return myxmr::htmlresponse(xmrblocks.show_my_outputs(
+        return myevo::htmlresponse(evoblocks.show_my_outputs(
                                          remove_bad_chars(tx_hash),
-                                         remove_bad_chars(xmr_address),
+                                         remove_bad_chars(evo_address),
                                          remove_bad_chars(viewkey),
                                          string {},
                                          domain));
     });
 
     CROW_ROUTE(app, "/prove").methods("POST"_method)
-        ([&](const crow::request& req) -> myxmr::htmlresponse 
+        ([&](const crow::request& req) -> myevo::htmlresponse 
          {
 
             map<std::string, std::string> post_body
-                    = xmreg::parse_crow_post_data(req.body);
+                    = evoeg::parse_crow_post_data(req.body);
 
-            if (post_body.count("xmraddress") == 0
+            if (post_body.count("evoaddress") == 0
                 || post_body.count("txprvkey") == 0
                 || post_body.count("txhash") == 0)
             {
-                return string("xmr address, tx private key or "
+                return string("evo address, tx private key or "
                                       "tx hash not provided");
             }
 
             string tx_hash     = remove_bad_chars(post_body["txhash"]);
             string tx_prv_key  = remove_bad_chars(post_body["txprvkey"]);
-            string xmr_address = remove_bad_chars(post_body["xmraddress"]);
+            string evo_address = remove_bad_chars(post_body["evoaddress"]);
 
             // this will be only not empty when checking raw tx data
             // using tx pusher
@@ -499,8 +499,8 @@ main(int ac, const char* av[])
 
             string domain      = get_domain(req);
 
-            return myxmr::htmlresponse(xmrblocks.show_prove(tx_hash,
-                                        xmr_address,
+            return myevo::htmlresponse(evoblocks.show_prove(tx_hash,
+                                        evo_address,
                                         tx_prv_key,
                                         raw_tx_data,
                                         domain));
@@ -509,14 +509,14 @@ main(int ac, const char* av[])
 
     CROW_ROUTE(app, "/prove/<string>/<string>/<string>")
     ([&](const crow::request& req, string tx_hash,
-         string xmr_address, string tx_prv_key) 
+         string evo_address, string tx_prv_key) 
      {
 
         string domain = get_domain(req);
 
-        return myxmr::htmlresponse(xmrblocks.show_prove(
+        return myevo::htmlresponse(evoblocks.show_prove(
                                     remove_bad_chars(tx_hash),
-                                    remove_bad_chars(xmr_address),
+                                    remove_bad_chars(evo_address),
                                     remove_bad_chars(tx_prv_key),
                                     string {},
                                     domain));
@@ -526,15 +526,15 @@ main(int ac, const char* av[])
     {
         CROW_ROUTE(app, "/rawtx")
         ([&]() {
-            return myxmr::htmlresponse(xmrblocks.show_rawtx());
+            return myevo::htmlresponse(evoblocks.show_rawtx());
         });
 
         CROW_ROUTE(app, "/checkandpush").methods("POST"_method)
-        ([&](const crow::request& req) -> myxmr::htmlresponse
+        ([&](const crow::request& req) -> myevo::htmlresponse
          {
 
             map<std::string, std::string> post_body
-                    = xmreg::parse_crow_post_data(req.body);
+                    = evoeg::parse_crow_post_data(req.body);
 
             if (post_body.count("rawtxdata") == 0 
                     || post_body.count("action") == 0)
@@ -546,11 +546,11 @@ main(int ac, const char* av[])
             string action      = remove_bad_chars(post_body["action"]);
 
             if (action == "check")
-                return myxmr::htmlresponse(
-                        xmrblocks.show_checkrawtx(raw_tx_data, action));
+                return myevo::htmlresponse(
+                        evoblocks.show_checkrawtx(raw_tx_data, action));
             else if (action == "push")
-                return myxmr::htmlresponse(
-                        xmrblocks.show_pushrawtx(raw_tx_data, action));
+                return myevo::htmlresponse(
+                        evoblocks.show_pushrawtx(raw_tx_data, action));
             return string("Provided action is neither check nor push");
 
         });
@@ -560,15 +560,15 @@ main(int ac, const char* av[])
     {
         CROW_ROUTE(app, "/rawkeyimgs")
         ([&]() {
-            return myxmr::htmlresponse(xmrblocks.show_rawkeyimgs());
+            return myevo::htmlresponse(evoblocks.show_rawkeyimgs());
         });
 
         CROW_ROUTE(app, "/checkrawkeyimgs").methods("POST"_method)
-        ([&](const crow::request& req) -> myxmr::htmlresponse
+        ([&](const crow::request& req) -> myevo::htmlresponse
          {
 
             map<std::string, std::string> post_body
-                    = xmreg::parse_crow_post_data(req.body);
+                    = evoeg::parse_crow_post_data(req.body);
 
             if (post_body.count("rawkeyimgsdata") == 0)
             {
@@ -583,8 +583,8 @@ main(int ac, const char* av[])
             string raw_data = remove_bad_chars(post_body["rawkeyimgsdata"]);
             string viewkey  = remove_bad_chars(post_body["viewkey"]);
 
-            return myxmr::htmlresponse(
-                    xmrblocks.show_checkrawkeyimgs(raw_data, viewkey));
+            return myevo::htmlresponse(
+                    evoblocks.show_checkrawkeyimgs(raw_data, viewkey));
         });
     }
 
@@ -593,15 +593,15 @@ main(int ac, const char* av[])
     {
         CROW_ROUTE(app, "/rawoutputkeys")
         ([&]() {
-            return myxmr::htmlresponse(xmrblocks.show_rawoutputkeys());
+            return myevo::htmlresponse(evoblocks.show_rawoutputkeys());
         });
 
         CROW_ROUTE(app, "/checkrawoutputkeys").methods("POST"_method)
-        ([&](const crow::request& req) -> myxmr::htmlresponse
+        ([&](const crow::request& req) -> myevo::htmlresponse
          {
 
             map<std::string, std::string> post_body
-                    = xmreg::parse_crow_post_data(req.body);
+                    = evoeg::parse_crow_post_data(req.body);
 
             if (post_body.count("rawoutputkeysdata") == 0)
             {
@@ -617,34 +617,34 @@ main(int ac, const char* av[])
             string raw_data = remove_bad_chars(post_body["rawoutputkeysdata"]);
             string viewkey  = remove_bad_chars(post_body["viewkey"]);
 
-            return myxmr::htmlresponse(
-                    xmrblocks.show_checkcheckrawoutput(raw_data, viewkey));
+            return myevo::htmlresponse(
+                    evoblocks.show_checkcheckrawoutput(raw_data, viewkey));
         });
     }
 
 
     CROW_ROUTE(app, "/search").methods("GET"_method)
     ([&](const crow::request& req) {
-        return myxmr::htmlresponse(
-                xmrblocks.search(
+        return myevo::htmlresponse(
+                evoblocks.search(
                     remove_bad_chars(
                         string(req.url_params.get("value")))));
     });
 
     CROW_ROUTE(app, "/mempool")
     ([&]() {
-        return myxmr::htmlresponse(xmrblocks.mempool(true));
+        return myevo::htmlresponse(evoblocks.mempool(true));
     });
 
     // alias to  "/mempool"
     CROW_ROUTE(app, "/txpool")
     ([&]() {
-        return myxmr::htmlresponse(xmrblocks.mempool(true));
+        return myevo::htmlresponse(evoblocks.mempool(true));
     });
 
 //    CROW_ROUTE(app, "/altblocks")
 //    ([&](const crow::request& req) {
-//        return xmrblocks.altblocks();
+//        return evoblocks.altblocks();
 //    });
 
     CROW_ROUTE(app, "/robots.txt")
@@ -662,7 +662,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/transaction/<string>")
         ([&](string tx_hash) {
 
-            myxmr::jsonresponse r{xmrblocks.json_transaction(remove_bad_chars(tx_hash))};
+            myevo::jsonresponse r{evoblocks.json_transaction(remove_bad_chars(tx_hash))};
 
             return r;
         });
@@ -670,7 +670,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/rawtransaction/<string>")
         ([&](string tx_hash) {
 
-            myxmr::jsonresponse r{xmrblocks.json_rawtransaction(remove_bad_chars(tx_hash))};
+            myevo::jsonresponse r{evoblocks.json_rawtransaction(remove_bad_chars(tx_hash))};
 
             return r;
         });
@@ -678,7 +678,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/detailedtransaction/<string>")
         ([&](string tx_hash) {
 
-            myxmr::jsonresponse r{xmrblocks.json_detailedtransaction(remove_bad_chars(tx_hash))};
+            myevo::jsonresponse r{evoblocks.json_detailedtransaction(remove_bad_chars(tx_hash))};
 
             return r;
         });
@@ -686,7 +686,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/block/<string>")
         ([&](string block_no_or_hash) {
 
-            myxmr::jsonresponse r{xmrblocks.json_block(remove_bad_chars(block_no_or_hash))};
+            myevo::jsonresponse r{evoblocks.json_block(remove_bad_chars(block_no_or_hash))};
 
             return r;
         });
@@ -694,7 +694,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/rawblock/<string>")
         ([&](string block_no_or_hash) {
 
-            myxmr::jsonresponse r{xmrblocks.json_rawblock(remove_bad_chars(block_no_or_hash))};
+            myevo::jsonresponse r{evoblocks.json_rawblock(remove_bad_chars(block_no_or_hash))};
 
             return r;
         });
@@ -708,7 +708,7 @@ main(int ac, const char* av[])
             string limit = regex_search(req.raw_url, regex {"limit=\\d+"}) ?
                            req.url_params.get("limit") : "25";
 
-            myxmr::jsonresponse r{xmrblocks.json_transactions(
+            myevo::jsonresponse r{evoblocks.json_transactions(
                     remove_bad_chars(page), remove_bad_chars(limit))};
 
             return r;
@@ -726,7 +726,7 @@ main(int ac, const char* av[])
             string limit = regex_search(req.raw_url, regex {"limit=\\d+"}) ?
                            req.url_params.get("limit") : "100000000";
 
-            myxmr::jsonresponse r{xmrblocks.json_mempool(
+            myevo::jsonresponse r{evoblocks.json_mempool(
                     remove_bad_chars(page), remove_bad_chars(limit))};
 
             return r;
@@ -735,7 +735,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/search/<string>")
         ([&](string search_value) {
 
-            myxmr::jsonresponse r{xmrblocks.json_search(remove_bad_chars(search_value))};
+            myevo::jsonresponse r{evoblocks.json_search(remove_bad_chars(search_value))};
 
             return r;
         });
@@ -743,7 +743,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/networkinfo")
         ([&]() {
 
-            myxmr::jsonresponse r{xmrblocks.json_networkinfo()};
+            myevo::jsonresponse r{evoblocks.json_networkinfo()};
 
             return r;
         });
@@ -751,7 +751,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/emission")
         ([&]() {
 
-            myxmr::jsonresponse r{xmrblocks.json_emission()};
+            myevo::jsonresponse r{evoblocks.json_emission()};
 
             return r;
         });
@@ -781,7 +781,7 @@ main(int ac, const char* av[])
                 cerr << "Cant parse tx_prove as bool. Using default value" << endl;
             }
 
-            myxmr::jsonresponse r{xmrblocks.json_outputs(
+            myevo::jsonresponse r{evoblocks.json_outputs(
                     remove_bad_chars(tx_hash),
                     remove_bad_chars(address),
                     remove_bad_chars(viewkey),
@@ -818,7 +818,7 @@ main(int ac, const char* av[])
                      << endl;
             }
 
-            myxmr::jsonresponse r{xmrblocks.json_outputsblocks(
+            myevo::jsonresponse r{evoblocks.json_outputsblocks(
                     remove_bad_chars(limit),
                     remove_bad_chars(address),
                     remove_bad_chars(viewkey),
@@ -830,7 +830,7 @@ main(int ac, const char* av[])
         CROW_ROUTE(app, "/api/version")
         ([&]() {
 
-            myxmr::jsonresponse r{xmrblocks.json_version()};
+            myevo::jsonresponse r{evoblocks.json_version()};
 
             return r;
         });
@@ -843,7 +843,7 @@ main(int ac, const char* av[])
         ([&]() {
             uint64_t page_no {0};
             bool refresh_page {true};
-            return myxmr::htmlresponse(xmrblocks.index2(page_no, refresh_page));
+            return myevo::htmlresponse(evoblocks.index2(page_no, refresh_page));
         });
     }
 
@@ -876,8 +876,8 @@ main(int ac, const char* av[])
 
         cout << "Waiting for emission monitoring thread to finish." << endl;
 
-        xmreg::CurrentBlockchainStatus::m_thread.interrupt();
-        xmreg::CurrentBlockchainStatus::m_thread.join();
+        evoeg::CurrentBlockchainStatus::m_thread.interrupt();
+        evoeg::CurrentBlockchainStatus::m_thread.join();
 
         cout << "Emission monitoring thread finished." << endl;
     }
@@ -886,8 +886,8 @@ main(int ac, const char* av[])
 
     cout << "Waiting for mempool monitoring thread to finish." << endl;
 
-    xmreg::MempoolStatus::m_thread.interrupt();
-    xmreg::MempoolStatus::m_thread.join();
+    evoeg::MempoolStatus::m_thread.interrupt();
+    evoeg::MempoolStatus::m_thread.join();
 
     cout << "Mempool monitoring thread finished." << endl;
 

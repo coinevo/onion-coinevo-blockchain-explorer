@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(PROJECT_NAME
-        xmrblocks)
+        evoblocks)
 
 
 project(${PROJECT_NAME})
@@ -13,33 +13,33 @@ if (WIN32)
 endif()
 
 
-if (NOT MONERO_DIR)
-    set(MONERO_DIR ~/monero)
+if (NOT COINEVO_DIR)
+    set(COINEVO_DIR ~/coinevo)
 endif()
 
-message(STATUS MONERO_DIR ": ${MONERO_DIR}")
+message(STATUS COINEVO_DIR ": ${COINEVO_DIR}")
 
-if (NOT MONERO_SOURCE_DIR)
-    set(MONERO_SOURCE_DIR ${MONERO_DIR}
-          CACHE PATH "Path to the root directory for Monero")
+if (NOT COINEVO_SOURCE_DIR)
+    set(COINEVO_SOURCE_DIR ${COINEVO_DIR}
+          CACHE PATH "Path to the root directory for Coinevo")
 endif()
 
-if (NOT MONERO_BUILD_DIR)
-    # set location of monero build tree
-    set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
-          CACHE PATH "Path to the build directory for Monero")
+if (NOT COINEVO_BUILD_DIR)
+    # set location of coinevo build tree
+    set(COINEVO_BUILD_DIR ${COINEVO_SOURCE_DIR}/build/release/
+          CACHE PATH "Path to the build directory for Coinevo")
 
-   if (NOT EXISTS ${MONERO_BUILD_DIR})   
+   if (NOT EXISTS ${COINEVO_BUILD_DIR})   
         # try different location   
-        message(STATUS "Trying different folder for monero libraries")
-        set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/Linux/master/release/
-            CACHE PATH "Path to the build directory for Monero" FORCE)
+        message(STATUS "Trying different folder for coinevo libraries")
+        set(COINEVO_BUILD_DIR ${COINEVO_SOURCE_DIR}/build/Linux/master/release/
+            CACHE PATH "Path to the build directory for Coinevo" FORCE)
     endif()
 
 endif()
 
-if (NOT EXISTS ${MONERO_BUILD_DIR})   
-  message(FATAL_ERROR "Monero libraries not found in: ${MONERO_BUILD_DIR}")
+if (NOT EXISTS ${COINEVO_BUILD_DIR})   
+  message(FATAL_ERROR "Coinevo libraries not found in: ${COINEVO_BUILD_DIR}")
 endif()
 
 set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
@@ -47,12 +47,12 @@ set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
 
 list(APPEND CMAKE_MODULE_PATH "${MY_CMAKE_DIR}")
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${MONERO_BUILD_DIR}"
-        CACHE PATH "Add Monero directory for library searching")
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${COINEVO_BUILD_DIR}"
+        CACHE PATH "Add Coinevo directory for library searching")
 
 include(MyUtils)
 
-find_package(Monero)
+find_package(Coinevo)
 
 # find boost
 find_package(Boost COMPONENTS
@@ -78,7 +78,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR WIN32)
     add_library(unbound STATIC IMPORTED)
-    set_property(TARGET unbound PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/external/unbound/libunbound.a)
+    set_property(TARGET unbound PROPERTY IMPORTED_LOCATION ${COINEVO_BUILD_DIR}/external/unbound/libunbound.a)
 endif()
 
 
@@ -86,8 +86,8 @@ endif()
 # include boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 
-# include monero
-include_directories(${MONERO_SOURCE_DIR}/build)
+# include coinevo
+include_directories(${COINEVO_SOURCE_DIR}/build)
 
 include_directories("ext/mstch/include")
 include_directories("ext/mstch/include/src")
