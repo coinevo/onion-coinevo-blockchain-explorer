@@ -135,7 +135,7 @@ To run it:
 ./evoblocks
 ```
 
-By default it will look for blockchain in its default location i.e., `~/.bitcoinevo/lmdb`.
+By default it will look for blockchain in its default location i.e., `~/.coinevo/lmdb`.
 You can use `-b` option if its in different location.
 
 For example:
@@ -201,7 +201,7 @@ evoblocks, Onion Coinevo Blockchain Explorer:
                                         queries. Default is 0 which means it is
                                         based you on the cpu
   -b [ --bc-path ] arg                  path to lmdb folder of the blockchain,
-                                        e.g., ~/.bitcoinevo/lmdb
+                                        e.g., ~/.coinevo/lmdb
   --ssl-crt-file arg                    path to crt file for ssl (https)
                                         functionality
   --ssl-key-file arg                    path to key file for ssl (https)
@@ -236,10 +236,10 @@ This flag will enable emission monitoring thread. When started, the thread
  will initially scan the entire blockchain, and calculate the cumulative emission based on each block.
 Since it is a separate thread, the explorer will work as usual during this time.
 Every 10000 blocks, the thread will save current emission in a file, by default,
- in `~/.bitcoinevo/lmdb/emission_amount.txt`. For testnet or stagenet networks,
- it is `~/.bitcoinevo/testnet/lmdb/emission_amount.txt` or `~/.bitcoinevo/stagenet/lmdb/emission_amount.txt`. This file is used so that we don't
+ in `~/.coinevo/lmdb/emission_amount.txt`. For testnet or stagenet networks,
+ it is `~/.coinevo/testnet/lmdb/emission_amount.txt` or `~/.coinevo/stagenet/lmdb/emission_amount.txt`. This file is used so that we don't
  need to rescan entire blockchain whenever the explorer is restarted. When the
- explorer restarts, the thread will first check if `~/.bitcoinevo/lmdb/emission_amount.txt`
+ explorer restarts, the thread will first check if `~/.coinevo/lmdb/emission_amount.txt`
  is present, read its values, and continue from there if possible. Subsequently, only the initial
  use of the tread is time consuming. Once the thread scans the entire blockchain, it updates
  the emission amount using new blocks as they come. Since the explorer writes this file, there can

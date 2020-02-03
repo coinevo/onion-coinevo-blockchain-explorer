@@ -64,7 +64,7 @@ namespace evoeg
                 ("concurrency,c", value<size_t>()->default_value(0),
                  "number of threads handling http queries. Default is 0 which means it is based you on the cpu")
                 ("bc-path,b", value<string>(),
-                 "path to lmdb folder of the blockchain, e.g., ~/.bitcoinevo/lmdb")
+                 "path to lmdb folder of the blockchain, e.g., ~/.coinevo/lmdb")
                 ("ssl-crt-file", value<string>(),
                  "path to crt file for ssl (https) functionality")
                 ("ssl-key-file", value<string>(),
